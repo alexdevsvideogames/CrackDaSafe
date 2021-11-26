@@ -12,7 +12,7 @@ public class Capsule : MonoBehaviour
     public BallLock balllock = new BallLock();
     public BonusLock bonuslock = new BonusLock();
 
-    public float speed = 0.001f;
+    public float speed = 0.02f;
     public int dir = 1;
     public float angle = 0.0f;
     public int score = 0;
@@ -66,15 +66,17 @@ public class Capsule : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.Escape))
-        {
-            Application.Quit();
-        }
+        //if (Input.GetKey(KeyCode.Escape))
+        //{
+        //    Application.Quit();
+        //}
 
         // restart from gameover
         if (GameOverFlag)
         {
             if (Input.GetMouseButtonDown(0)) {
+                balllock.Move();
+                bonuslock.Reset();
                 Start();
                 GameOverFlag = false;
             }
