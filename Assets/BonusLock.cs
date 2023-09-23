@@ -22,8 +22,8 @@ public class BonusLock : MonoBehaviour
     public void spawn_bonus()
     {
         float chance = Random.Range(0.0f,100.0f);
-        Debug.Log(chance);
-        if (chance < 20.0f) 
+        //Debug.Log(chance);
+        if (chance < 50.0f) 
         {
             BonusMove();
         } else {

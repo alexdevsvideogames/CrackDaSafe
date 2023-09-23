@@ -2,21 +2,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class Capsule : MonoBehaviour
 {
     public Text ScoreText;
     public Text HiScoreText;
-    public Text GameOverText;
+    public TextMeshProUGUI GameOverText;
 
     public BallLock balllock = new BallLock();
     public BonusLock bonuslock = new BonusLock();
+    public HeartLock heartlock = new HeartLock();
 
-    public float speed = 0.02f;
-    public int dir = 1;
-    public float angle = 0.0f;
-    public int score = 0;
-    public int Lives = 3;
+    public float speed;
+    public float speedInc;
+    public int dir;
+    public float angle;
+    public int score;
+    public int Lives;
 
     public Image Life1;
     public Image Life2;
@@ -30,7 +33,8 @@ public class Capsule : MonoBehaviour
     public AudioSource hit;
     public AudioSource bonus;
     private AudioSource source;
-    private float hitVol = .2F;
+    public AudioSource heal;
+    //private float hitVol = .2F;
     public AudioSource gameaudio;
 
     void Awake ()
@@ -45,8 +49,9 @@ public class Capsule : MonoBehaviour
         score = 0;
         dir = 1;
         Lives = 3;
-        speed = 0.02f;
+        speed = 4f;
         angle = 0.0f;
+        speedInc = 0.001f;
         ScoreText.text = score.ToString();
 
         Life1.enabled = true;
@@ -77,13 +82,14 @@ public class Capsule : MonoBehaviour
             if (Input.GetMouseButtonDown(0)) {
                 balllock.Move();
                 bonuslock.Reset();
+                heartlock.Reset();
                 Start();
                 GameOverFlag = false;
             }
         }
         else
         {
-            angle += (dir * speed); 
+            angle += (dir * speed * Mathf.PI / 180); 
 
             // change position based on angle
             float x = 4.4f * Mathf.Sin(angle);
@@ -96,24 +102,32 @@ public class Capsule : MonoBehaviour
 
             if (Input.GetMouseButtonDown(0)) {
                 dir = dir * -1;
-                Debug.Log(overlap);
+                //Debug.Log(overlap);
                 if (overlap) {
-                    Debug.Log(CollidingWith);
+                    //Debug.Log(CollidingWith);
                     if (CollidingWith == "BallLock")
                     {
                         balllock.Move();
                         bonuslock.spawn_bonus();
+                        heartlock.spawn_bonus();
                         score += 1;
                         ScoreText.text = score.ToString();
                         hit.Play();
-                        speed += 0.001f;
+                        speed += speedInc;
                     } else if (CollidingWith == "BonusLock")
                     {
                         bonuslock.Reset();
                         score += 5;
                         ScoreText.text = score.ToString();
                         bonus.Play();
-                        speed += 0.001f;
+                        speed += speedInc*2;
+                    } else if (CollidingWith == "HeartLock")
+                    {
+                        heartlock.Reset();
+                        Lives += 1;
+                        update_life_tally(Lives);
+                        heal.Play();
+                        speed += speedInc*2;
                     }
                 } else {
                     Lives -=1 ;
@@ -136,6 +150,7 @@ public class Capsule : MonoBehaviour
     {
         overlap = true;
         CollidingWith = coll.gameObject.name;
+        Debug.Log(CollidingWith);
     }
 
     private void OnCollisionExit2D (Collision2D coll)
